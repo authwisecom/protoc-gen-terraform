@@ -1,0 +1,6 @@
+#!/bin/bash
+
+if [ -n "$(git status -uall --porcelain)" ]; then
+    echo "Dirty git state detected"
+    exit 1
+fi
