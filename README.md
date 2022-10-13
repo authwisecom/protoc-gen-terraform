@@ -1,4 +1,4 @@
-# protoc-gen-terraform
+# [WIP] protoc-gen-terraform
 
 protoc plugin that generates Terraform Plugin Framework schema definitions and marshalling/copy functions for golang/protobuf .proto files.
 
