@@ -1,0 +1,9 @@
+syntax = "proto3";
+package test;
+option go_package = "github.com/liamawhite/protoc-gen-terraform/test";
+
+// Validates that it can handle multiple files
+message Test2 {
+    // Str string field
+    string Str = 1 ;
+}
