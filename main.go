@@ -15,7 +15,7 @@
 package main
 
 import (
-	"os"
+	"flag"
 
 	"google.golang.org/protobuf/compiler/protogen"
 
@@ -26,10 +26,13 @@ import (
 )
 
 func main() {
-	if debug := os.Getenv("DEBUG"); debug != "" {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
-	protogen.Options{}.Run(func(gen *protogen.Plugin) error {
+	var flags flag.FlagSet
+	loglevel := flags.Int("loglevel", 1, "loglevel available at https://pkg.go.dev/github.com/rs/zerolog@v1.28.0?utm_source=gopls#Level")
+
+	protogen.Options{
+		ParamFunc: flags.Set,
+	}.Run(func(gen *protogen.Plugin) error {
+		zerolog.SetGlobalLevel(zerolog.Level(*loglevel))
 		for _, f := range gen.Files {
 			if !f.Generate {
 				continue
