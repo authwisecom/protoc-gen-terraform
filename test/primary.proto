@@ -27,6 +27,7 @@ enum Mode {
 }
 
 // Test message definition.
+// +terraform-gen:config:test.terraform.yaml
 message Test {
     // Str string field
     string Str = 1 ;
@@ -142,9 +143,6 @@ message Test {
 
     // Required string field
     string required = 38 [(google.api.field_behavior) = REQUIRED];
-
-    // Computed string field
-    string computed = 39 [(google.api.field_behavior) = OUTPUT_ONLY];
 }
 
 // EmptyMessageBranch message for empty oneof branch

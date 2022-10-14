@@ -29,14 +29,14 @@ func TestSchema(t *testing.T) {
 	require.False(t, diags.HasError())
 
 	t.Run("Field Annotations", func(*testing.T) {
-		require.True(t, schema.Attributes["computed"].Computed)
 		require.True(t, schema.Attributes["required"].Required)
 		require.True(t, schema.Attributes["str"].Optional)
 	})
 
-	t.Run("Id field injection top-level only", func(*testing.T) {
-		require.Equal(t, types.StringType, schema.Attributes["id"].Type)
-		require.Nil(t, schema.Attributes["nested"].Attributes.GetAttributes()["Id"])
+	t.Run("Field injection", func(*testing.T) {
+		require.True(t, schema.Attributes["inject_computed"].Computed)
+		require.True(t, schema.Attributes["inject_required"].Required)
+		require.True(t, schema.Attributes["inject_optional"].Optional)
 	})
 
 	t.Run("Primitive types", func(*testing.T) {

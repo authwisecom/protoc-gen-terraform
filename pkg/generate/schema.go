@@ -36,25 +36,22 @@ func Scheme(f *j.File, m *protogen.Message) {
 		Block(j.Return(
 			j.Qual(SDK, "Schema").Values(j.Dict{
 				j.Id("Attributes"): j.Map(j.String()).Qual(SDK, "Attribute").Values(
-					fieldsDictSchema(m, true),
+					fieldsDictSchema(m),
 				),
 			}),
 			j.Nil(),
 		))
 }
 
-func fieldsDictSchema(m *protogen.Message, injectId bool) j.Dict {
+func fieldsDictSchema(m *protogen.Message) j.Dict {
+	cfg := loadConfig(m)
 	d := j.Dict{}
-
 	for _, f := range m.Fields {
 		d[j.Lit(snakeCase(f.GoName))] = field(f)
 	}
 
-	if injectId {
-		d[j.Lit("id")] = j.Values(j.Dict{
-			j.Id("Type"):     j.Qual(Types, "StringType"),
-			j.Id("Computed"): j.Lit(true),
-		})
+	for key, value := range cfg.InjectedFields {
+		d[j.Lit(snakeCase(key))] = generateInjectedField(value)
 	}
 
 	return d
@@ -75,9 +72,6 @@ func field(f *protogen.Field) j.Code {
 		case annotations.FieldBehavior_REQUIRED:
 			d[j.Id("Required")] = j.Lit(true)
 			optional = false
-		case annotations.FieldBehavior_OUTPUT_ONLY:
-			d[j.Id("Computed")] = j.Lit(true)
-			optional = false
 		}
 	}
 	// If required or computed is not set, default to optional
@@ -97,6 +91,17 @@ var primitiveTypeMap = map[protoreflect.Kind]*j.Statement{
 	protoreflect.FloatKind:  j.Qual(Types, "Float64Type"),
 	protoreflect.DoubleKind: j.Qual(Types, "Float64Type"),
 	protoreflect.BoolKind:   j.Qual(Types, "BoolType"),
+}
+
+func generateInjectedField(f injectedField) j.Code {
+	d := j.Dict{
+		j.Id("Type"):     j.Id(f.Type),
+		j.Id("Required"): j.Lit(f.Required),
+		j.Id("Computed"): j.Lit(f.Computed),
+		j.Id("Optional"): j.Lit(f.Optional),
+	}
+
+	return j.Values(d)
 }
 
 func schemaType(d protoreflect.FieldDescriptor) *j.Statement {
@@ -143,7 +148,7 @@ func attributes(f *protogen.Field) *j.Statement {
 }
 func xNestAttributes(typ string, m *protogen.Message) *j.Statement {
 	return j.Qual(SDK, typ+"NestedAttributes").Params(
-		j.Map(j.String()).Qual(SDK, "Attribute").Values(fieldsDictSchema(m, false)),
+		j.Map(j.String()).Qual(SDK, "Attribute").Values(fieldsDictSchema(m)),
 	)
 }
 

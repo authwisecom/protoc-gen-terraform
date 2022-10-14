@@ -86,6 +86,7 @@ func (Mode) EnumDescriptor() ([]byte, []int) {
 }
 
 // Test message definition.
+// +terraform-gen:config:test.terraform.yaml
 type Test struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

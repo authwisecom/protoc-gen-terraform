@@ -60,8 +60,8 @@ func GenSchemaTest(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 			Type:        types.StringType,
 		},
 		"computed": {
-			Computed:    true,
 			Description: "Computed string field",
+			Optional:    true,
 			Type:        types.StringType,
 		},
 		"double": {
@@ -74,9 +74,23 @@ func GenSchemaTest(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 			Optional:    true,
 			Type:        types.Float64Type,
 		},
-		"id": {
+		"inject_computed": {
 			Computed: true,
+			Optional: false,
+			Required: false,
 			Type:     types.StringType,
+		},
+		"inject_optional": {
+			Computed: false,
+			Optional: true,
+			Required: false,
+			Type:     types.BoolType,
+		},
+		"inject_required": {
+			Computed: false,
+			Optional: false,
+			Required: true,
+			Type:     types.Int64Type,
 		},
 		"int32": {
 			Description: "Int32 int32 field",
@@ -220,19 +234,12 @@ func GenSchemaTest(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 
 // GenSchemaEmptyMessageBranch returns tfsdk.Schema definition for EmptyMessageBranch
 func GenSchemaEmptyMessageBranch(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{Attributes: map[string]tfsdk.Attribute{"id": {
-		Computed: true,
-		Type:     types.StringType,
-	}}}, nil
+	return tfsdk.Schema{Attributes: map[string]tfsdk.Attribute{}}, nil
 }
 
 // GenSchemaNested returns tfsdk.Schema definition for Nested
 func GenSchemaNested(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{Attributes: map[string]tfsdk.Attribute{
-		"id": {
-			Computed: true,
-			Type:     types.StringType,
-		},
 		"map": {
 			Description: "Nested map repeated nested messages",
 			Optional:    true,
@@ -266,45 +273,27 @@ func GenSchemaNested(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 
 // GenSchemaOtherNested returns tfsdk.Schema definition for OtherNested
 func GenSchemaOtherNested(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{Attributes: map[string]tfsdk.Attribute{
-		"id": {
-			Computed: true,
-			Type:     types.StringType,
-		},
-		"str": {
-			Description: "Str string field",
-			Optional:    true,
-			Type:        types.StringType,
-		},
-	}}, nil
+	return tfsdk.Schema{Attributes: map[string]tfsdk.Attribute{"str": {
+		Description: "Str string field",
+		Optional:    true,
+		Type:        types.StringType,
+	}}}, nil
 }
 
 // GenSchemaBranch1 returns tfsdk.Schema definition for Branch1
 func GenSchemaBranch1(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{Attributes: map[string]tfsdk.Attribute{
-		"id": {
-			Computed: true,
-			Type:     types.StringType,
-		},
-		"str": {
-			Description: "Str string field",
-			Optional:    true,
-			Type:        types.StringType,
-		},
-	}}, nil
+	return tfsdk.Schema{Attributes: map[string]tfsdk.Attribute{"str": {
+		Description: "Str string field",
+		Optional:    true,
+		Type:        types.StringType,
+	}}}, nil
 }
 
 // GenSchemaBranch2 returns tfsdk.Schema definition for Branch2
 func GenSchemaBranch2(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{Attributes: map[string]tfsdk.Attribute{
-		"id": {
-			Computed: true,
-			Type:     types.StringType,
-		},
-		"int32": {
-			Description: "Int32 int field",
-			Optional:    true,
-			Type:        types.Int64Type,
-		},
-	}}, nil
+	return tfsdk.Schema{Attributes: map[string]tfsdk.Attribute{"int32": {
+		Description: "Int32 int field",
+		Optional:    true,
+		Type:        types.Int64Type,
+	}}}, nil
 }

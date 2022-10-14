@@ -25,15 +25,9 @@ import (
 
 // GenSchemaTest2 returns tfsdk.Schema definition for Test2
 func GenSchemaTest2(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{Attributes: map[string]tfsdk.Attribute{
-		"id": {
-			Computed: true,
-			Type:     types.StringType,
-		},
-		"str": {
-			Description: "Str string field",
-			Optional:    true,
-			Type:        types.StringType,
-		},
-	}}, nil
+	return tfsdk.Schema{Attributes: map[string]tfsdk.Attribute{"str": {
+		Description: "Str string field",
+		Optional:    true,
+		Type:        types.StringType,
+	}}}, nil
 }
