@@ -24,10 +24,15 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func Scheme(f *j.File, m *protogen.Message) {
 	id := "GenSchema" + m.GoIdent.GoName
+	l := log.With().Str("generator", "Schema").Str("proto", m.GoIdent.GoName).Logger()
+	l.Debug().Msg("Generating schema")
 	f.Commentf("// %v returns tfsdk.Schema definition for %v\n", id, m.GoIdent.GoName).
 		Func().
 		Id(id).
@@ -36,32 +41,33 @@ func Scheme(f *j.File, m *protogen.Message) {
 		Block(j.Return(
 			j.Qual(SDK, "Schema").Values(j.Dict{
 				j.Id("Attributes"): j.Map(j.String()).Qual(SDK, "Attribute").Values(
-					fieldsDictSchema(m),
+					fieldsDictSchema(l, m),
 				),
 			}),
 			j.Nil(),
 		))
 }
 
-func fieldsDictSchema(m *protogen.Message) j.Dict {
+func fieldsDictSchema(l zerolog.Logger, m *protogen.Message) j.Dict {
 	cfg := loadConfig(m)
 	d := j.Dict{}
 	for _, f := range m.Fields {
-		d[j.Lit(snakeCase(f.GoName))] = field(f)
+		d[j.Lit(snakeCase(f.GoName))] = field(l, f)
 	}
 
 	for key, value := range cfg.InjectedFields {
-		d[j.Lit(snakeCase(key))] = generateInjectedField(value)
+		d[j.Lit(snakeCase(key))] = generateInjectedField(l, value)
 	}
 
 	return d
 }
 
-func field(f *protogen.Field) j.Code {
+func field(l zerolog.Logger, f *protogen.Field) j.Code {
+	l.Debug().Msgf("handling field: %v", f.GoName)
 	d := j.Dict{
 		j.Id("Description"): j.Lit(trimComments(f.Comments.Leading)),
-		j.Id("Type"):        schemaType(f.Desc), // nils are automatically omitted
-		j.Id("Attributes"):  attributes(f),
+		j.Id("Type"):        schemaType(l, f.Desc), // nils are automatically omitted
+		j.Id("Attributes"):  attributes(l, f),
 	}
 
 	// Handle field behavior annotations
@@ -93,7 +99,7 @@ var primitiveTypeMap = map[protoreflect.Kind]*j.Statement{
 	protoreflect.BoolKind:   j.Qual(Types, "BoolType"),
 }
 
-func generateInjectedField(f injectedField) j.Code {
+func generateInjectedField(l zerolog.Logger, f injectedField) j.Code {
 	d := j.Dict{
 		j.Id("Type"):     j.Id(f.Type),
 		j.Id("Required"): j.Lit(f.Required),
@@ -104,7 +110,7 @@ func generateInjectedField(f injectedField) j.Code {
 	return j.Values(d)
 }
 
-func schemaType(d protoreflect.FieldDescriptor) *j.Statement {
+func schemaType(l zerolog.Logger, d protoreflect.FieldDescriptor) *j.Statement {
 	if d.IsList() {
 		// If the type isnt a primitive then type is nil, we use attributes instead.
 		if _, ok := primitiveTypeMap[d.Kind()]; !ok {
@@ -126,11 +132,11 @@ func schemaType(d protoreflect.FieldDescriptor) *j.Statement {
 	return primitiveTypeMap[d.Kind()]
 }
 
-func attributes(f *protogen.Field) *j.Statement {
+func attributes(l zerolog.Logger, f *protogen.Field) *j.Statement {
 	// If message is not nil it can't be a primitive type (string, bool, etc.).
 	if f.Message != nil {
 		if f.Desc.IsList() {
-			return xNestAttributes("List", f.Message)
+			return xNestAttributes(l, "List", f.Message)
 		}
 		if f.Desc.IsMap() {
 			// If the map has a primitive value we use type, not attributes.
@@ -138,17 +144,17 @@ func attributes(f *protogen.Field) *j.Statement {
 				return nil
 			}
 			// Not sure how safe the assumption that fields[1] is always value and not key ¯\_(ツ)_/¯.
-			return xNestAttributes("Map", f.Message.Fields[1].Message)
+			return xNestAttributes(l, "Map", f.Message.Fields[1].Message)
 		}
 		// If we've got this far is must be single nested
-		return xNestAttributes("Single", f.Message)
+		return xNestAttributes(l, "Single", f.Message)
 
 	}
 	return nil
 }
-func xNestAttributes(typ string, m *protogen.Message) *j.Statement {
+func xNestAttributes(l zerolog.Logger, typ string, m *protogen.Message) *j.Statement {
 	return j.Qual(SDK, typ+"NestedAttributes").Params(
-		j.Map(j.String()).Qual(SDK, "Attribute").Values(fieldsDictSchema(m)),
+		j.Map(j.String()).Qual(SDK, "Attribute").Values(fieldsDictSchema(l, m)),
 	)
 }
 

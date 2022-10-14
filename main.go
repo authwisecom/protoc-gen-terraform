@@ -15,14 +15,20 @@
 package main
 
 import (
+	"os"
+
 	"google.golang.org/protobuf/compiler/protogen"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/rs/zerolog"
 
 	"github.com/liamawhite/protoc-gen-terraform/pkg/generate"
 )
 
 func main() {
+	if debug := os.Getenv("DEBUG"); debug != "" {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
 	protogen.Options{}.Run(func(gen *protogen.Plugin) error {
 		for _, f := range gen.Files {
 			if !f.Generate {

@@ -5,14 +5,13 @@ go 1.19
 require (
 	github.com/dave/jennifer v1.5.1
 	github.com/hashicorp/terraform-plugin-framework v0.14.0
-	github.com/stretchr/testify v1.7.2
+	github.com/rs/zerolog v1.28.0
+	github.com/stretchr/testify v1.8.0
 	google.golang.org/protobuf v1.28.1
+	gopkg.in/yaml.v3 v3.0.1
 )
 
-require (
-	github.com/pmezard/go-difflib v1.0.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
+require github.com/pmezard/go-difflib v1.0.0 // indirect
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

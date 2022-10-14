@@ -59,11 +59,6 @@ func GenSchemaTest(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 			Optional:    true,
 			Type:        types.StringType,
 		},
-		"computed": {
-			Description: "Computed string field",
-			Optional:    true,
-			Type:        types.StringType,
-		},
 		"double": {
 			Description: "Double double field",
 			Optional:    true,
