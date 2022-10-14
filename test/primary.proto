@@ -17,6 +17,7 @@ package test;
 option go_package = "github.com/liamawhite/protoc-gen-terraform/test";
 
 import "field_behavior.proto";
+import "struct.proto";
 
 // import "google/protobuf/timestamp.proto";
 
@@ -143,6 +144,9 @@ message Test {
 
     // Required string field
     string required = 38 [(google.api.field_behavior) = REQUIRED];
+
+    // Structs are self referential so we need to avoid infinite recursion
+    google.protobuf.Struct Struct = 39;
 }
 
 // EmptyMessageBranch message for empty oneof branch

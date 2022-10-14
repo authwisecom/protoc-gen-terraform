@@ -28,7 +28,6 @@ import (
 func main() {
 	var flags flag.FlagSet
 	loglevel := flags.Int("loglevel", 1, "loglevel available at https://pkg.go.dev/github.com/rs/zerolog@v1.28.0?utm_source=gopls#Level")
-
 	protogen.Options{
 		ParamFunc: flags.Set,
 	}.Run(func(gen *protogen.Plugin) error {

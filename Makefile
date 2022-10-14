@@ -20,7 +20,7 @@ clean:
 
 build:
 	go install github.com/liamawhite/protoc-gen-terraform
-	protoc -Iextensions/google/api -I. --go_out=. --go_opt=paths=source_relative --terraform_out=. --terraform_opt=paths=source_relative  --terraform_opt=loglevel=0 test/primary.proto test/secondary.proto
+	protoc -Iextensions/google/api -Iextensions/google/protobuf -I. --go_out=. --go_opt=paths=source_relative --terraform_out=. --terraform_opt=paths=source_relative  --terraform_opt=loglevel=0 test/primary.proto test/secondary.proto
 
 test: clean build
 	go test ./...  

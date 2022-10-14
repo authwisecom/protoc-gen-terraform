@@ -224,6 +224,14 @@ func GenSchemaTest(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 			Optional:    true,
 			Type:        types.ListType{ElemType: types.StringType},
 		},
+		"struct": {
+			Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{"fields": {
+				Description: "Unordered map of dynamically typed values.",
+				Type:        types.MapType{ElemType: types.ObjectType{}},
+			}}),
+			Description: "Structs are self referential so we need to avoid infinite recursion",
+			Optional:    true,
+		},
 	}}, nil
 }
 

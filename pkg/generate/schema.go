@@ -52,6 +52,17 @@ func fieldsDictSchema(l zerolog.Logger, m *protogen.Message) j.Dict {
 	cfg := loadConfig(m)
 	d := j.Dict{}
 	for _, f := range m.Fields {
+		// This is a horrible hack to avoid struct infinite recursion
+		if f.Parent.Desc.FullName() == "google.protobuf.Struct" {
+			d[j.Lit(snakeCase(f.GoName))] = j.Values(j.Dict{
+				j.Id("Description"): j.Lit(trimComments(f.Comments.Leading)),
+				j.Id("Type"): j.Qual(Types, "MapType").Values(j.Dict{
+					j.Id("ElemType"): j.Qual(Types, "ObjectType").Values(),
+				}),
+			})
+			continue
+		}
+
 		d[j.Lit(snakeCase(f.GoName))] = field(l, f)
 	}
 
@@ -64,6 +75,7 @@ func fieldsDictSchema(l zerolog.Logger, m *protogen.Message) j.Dict {
 
 func field(l zerolog.Logger, f *protogen.Field) j.Code {
 	l.Debug().Msgf("handling field: %v", f.GoName)
+
 	d := j.Dict{
 		j.Id("Description"): j.Lit(trimComments(f.Comments.Leading)),
 		j.Id("Type"):        schemaType(l, f.Desc), // nils are automatically omitted
@@ -159,7 +171,14 @@ func xNestAttributes(l zerolog.Logger, typ string, m *protogen.Message) *j.State
 }
 
 func trimComments(c protogen.Comments) string {
-	return strings.TrimSpace(strings.TrimPrefix(c.String(), "// "))
+	newline := regexp.MustCompile(`\n//`)
+	variable := regexp.MustCompile(`[ ]*\$[^\/]+[ ]*`)
+
+	trimmed := strings.TrimSpace(strings.TrimPrefix(c.String(), "// "))
+	trimmed = newline.ReplaceAllString(trimmed, "")
+	trimmed = variable.ReplaceAllString(trimmed, "")
+
+	return trimmed
 }
 
 func snakeCase(s string) string {
@@ -169,3 +188,5 @@ func snakeCase(s string) string {
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
 	return strings.ToLower(snake)
 }
+
+// func handleStructValue()
